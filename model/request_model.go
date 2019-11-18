@@ -10,7 +10,6 @@ package model
 import (
 	"errors"
 	"fmt"
-	"io"
 	"net/http"
 	"strings"
 	"sync"
@@ -70,7 +69,7 @@ type Request struct {
 	Form            string            // http/webSocket/tcp
 	Method          string            // 方法 get/post/put
 	Headers         map[string]string // Headers
-	Body            io.Reader         // body
+	Body            []byte            // body
 	Verify          string            // 验证的方法
 	VerifyHttp      VerifyHttp        // 验证的方法
 	VerifyWebSocket VerifyWebSocket   // 验证的方法
@@ -92,7 +91,7 @@ func NewRequest(url string, verify string, timeout time.Duration, debug bool, pa
 	var (
 		method  = "GET"
 		headers = make(map[string]string)
-		body    io.Reader
+		body    []byte
 	)
 
 	if path != "" {

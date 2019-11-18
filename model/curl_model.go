@@ -10,7 +10,6 @@ package model
 import (
 	"encoding/json"
 	"errors"
-	"io"
 	"io/ioutil"
 	"os"
 	"strings"
@@ -116,7 +115,7 @@ func (c *CURL) GetMethod() (method string) {
 	}
 
 	// TODO::目前发送不了
-	if _, ok := c.Data["--data-binary $"]; ok {
+	if _, ok := c.Data["--data-binary"]; ok {
 		method = "POST"
 
 		return
@@ -172,16 +171,26 @@ func (c *CURL) GetHeadersStr() string {
 }
 
 // 获取body
-func (c *CURL) GetBody() (body io.Reader) {
+func (c *CURL) GetBody() (body []byte) {
 
 	value, ok := c.Data["--data"]
 	if !ok {
 		// data-binary
-		value, ok = c.Data["--data-binary $"]
+		value, ok = c.Data["--data-binary"]
 		if !ok {
 
 			return
 		}
+		if len(value) < 0 {
+			return
+		}
+		f, err := os.Open(value[0])
+		if err != nil {
+			return
+		}
+		defer f.Close()
+		body, _ = ioutil.ReadAll(f)
+		return
 	}
 
 	if len(value) <= 0 {
@@ -189,7 +198,7 @@ func (c *CURL) GetBody() (body io.Reader) {
 		return
 	}
 
-	body = strings.NewReader(value[0])
+	body = []byte(value[0])
 
 	return
 }
@@ -202,7 +211,6 @@ func (c *CURL) GetBodyStr() (str string) {
 
 		return
 	}
-	bytes, _ := ioutil.ReadAll(body)
-	str = string(bytes)
+	str = string(body)
 	return
 }
