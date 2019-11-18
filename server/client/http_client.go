@@ -8,7 +8,6 @@
 package client
 
 import (
-	"crypto/tls"
 	"fmt"
 	"io"
 	"net/http"
@@ -21,17 +20,7 @@ import (
 // body 请求的body
 // headers 请求头信息
 // timeout 请求超时时间
-func HttpRequest(method, url string, body io.Reader, headers map[string]string, timeout time.Duration) (resp *http.Response, err error) {
-
-	// 跳过证书验证
-	tr := &http.Transport{
-		TLSClientConfig: &tls.Config{InsecureSkipVerify: true},
-	}
-
-	client := &http.Client{
-		Transport: tr,
-		Timeout:   timeout,
-	}
+func HttpRequest(c *http.Client, method, url string, body io.Reader, headers map[string]string, timeout time.Duration) (resp *http.Response, err error) {
 
 	req, err := http.NewRequest(method, url, body)
 	if err != nil {
@@ -51,7 +40,7 @@ func HttpRequest(method, url string, body io.Reader, headers map[string]string, 
 		req.Header.Set(key, value)
 	}
 
-	resp, err = client.Do(req)
+	resp, err = c.Do(req)
 	if err != nil {
 		fmt.Println("请求失败:", err)
 

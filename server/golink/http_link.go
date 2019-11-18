@@ -9,9 +9,11 @@ package golink
 
 import (
 	"bytes"
+	"crypto/tls"
 	"go-stress-testing/heper"
 	"go-stress-testing/model"
 	"go-stress-testing/server/client"
+	"net/http"
 	"sync"
 	"time"
 )
@@ -22,6 +24,16 @@ func Http(chanId uint64, ch chan<- *model.RequestResults, totalNumber uint64, wg
 	defer func() {
 		wg.Done()
 	}()
+
+	// 跳过证书验证
+	tr := &http.Transport{
+		TLSClientConfig: &tls.Config{InsecureSkipVerify: true},
+	}
+
+	c := &http.Client{
+		Transport: tr,
+		Timeout:   request.Timeout,
+	}
 
 	// fmt.Printf("启动协程 编号:%05d \n", chanId)
 	for i := uint64(0); i < totalNumber; i++ {
@@ -34,7 +46,7 @@ func Http(chanId uint64, ch chan<- *model.RequestResults, totalNumber uint64, wg
 
 		bodyReader := bytes.NewReader(request.Body)
 
-		resp, err := client.HttpRequest(request.Method, request.Url, bodyReader, request.Headers, request.Timeout)
+		resp, err := client.HttpRequest(c, request.Method, request.Url, bodyReader, request.Headers, request.Timeout)
 		requestTime := uint64(heper.DiffNano(startTime))
 		// resp, err := server.HttpGetResp(request.Url)
 		if err != nil {
