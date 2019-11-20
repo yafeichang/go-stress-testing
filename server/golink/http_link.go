@@ -13,6 +13,7 @@ import (
 	"go-stress-testing/heper"
 	"go-stress-testing/model"
 	"go-stress-testing/server/client"
+	"math/rand"
 	"net/http"
 	"sync"
 	"time"
@@ -35,9 +36,17 @@ func Http(chanId uint64, ch chan<- *model.RequestResults, totalNumber uint64, wg
 		Timeout:   request.Timeout,
 	}
 
+	r := rand.New(rand.NewSource(time.Now().UnixNano()))
+
 	// fmt.Printf("启动协程 编号:%05d \n", chanId)
 	for i := uint64(0); i < totalNumber; i++ {
-
+		sleepDur := time.Duration(r.Intn(500)) * time.Millisecond
+		if r.Intn(2) == 0 {
+			sleepDur = time.Second - sleepDur
+		} else {
+			sleepDur = time.Second + sleepDur
+		}
+		time.Sleep(sleepDur)
 		var (
 			startTime = time.Now()
 			isSucceed = false
@@ -54,6 +63,7 @@ func Http(chanId uint64, ch chan<- *model.RequestResults, totalNumber uint64, wg
 		} else {
 			// 验证请求是否成功
 			errCode, isSucceed = request.VerifyHttp(request, resp)
+			resp.Body.Close()
 		}
 
 		requestResults := &model.RequestResults{

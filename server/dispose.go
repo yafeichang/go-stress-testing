@@ -8,6 +8,7 @@
 package server
 
 import (
+	"code.byted.org/kite/kitc/rand"
 	"fmt"
 	"go-stress-testing/model"
 	"go-stress-testing/server/client"
@@ -47,6 +48,8 @@ func Dispose(concurrency, totalNumber uint64, request *model.Request) {
 	go statistics.ReceivingResults(concurrency, ch, &wgReceiving)
 
 	for i := uint64(0); i < concurrency; i++ {
+		sleepDur := rand.Intn(100)
+		time.Sleep(time.Duration(sleepDur) * time.Millisecond)
 		wg.Add(1)
 		switch request.Form {
 		case model.FormTypeHttp:
