@@ -8,13 +8,13 @@
 package server
 
 import (
-	"code.byted.org/kite/kitc/rand"
 	"fmt"
 	"go-stress-testing/model"
 	"go-stress-testing/server/client"
 	"go-stress-testing/server/golink"
 	"go-stress-testing/server/statistics"
 	"go-stress-testing/server/verify"
+	"math/rand"
 	"sync"
 	"time"
 )
